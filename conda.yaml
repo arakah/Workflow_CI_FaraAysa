@@ -1,0 +1,14 @@
+name: submission-mlops
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - mlflow==2.19.0
+      - scikit-learn
+      - pandas
+      - numpy
+      - matplotlib
+      - seaborn
+      - dagshub
