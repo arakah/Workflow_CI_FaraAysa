@@ -1,0 +1,15 @@
+artifact_uri: file:///D:/dicoding-fara/Workflow_CI_FaraAysa/mlruns/297200981800642141/ade088efab7d4b6db259acb2a8606eae/artifacts
+end_time: 1766135709529
+entry_point_name: ''
+experiment_id: '297200981800642141'
+lifecycle_stage: active
+run_id: ade088efab7d4b6db259acb2a8606eae
+run_name: skittish-finch-39
+run_uuid: ade088efab7d4b6db259acb2a8606eae
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1766135696759
+status: 3
+tags: []
+user_id: sander
