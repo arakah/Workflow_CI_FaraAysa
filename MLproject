@@ -1,4 +1,4 @@
-name: submission-mlops
+name: Submission_MLOps_FaraAysa
 
 conda_env: conda.yaml
 
