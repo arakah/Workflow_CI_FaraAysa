@@ -13,19 +13,19 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 DAGSHUB_USER = "aysafara.04"
 REPO_NAME = "submission-mlops"
 
+# Cek apakah tracking URI sudah diset oleh Environment Variable (CI)?
 if not mlflow.get_tracking_uri():
     # Ini jalan di laptop (Lokal), perlu dagshub.init
     print("[INFO] Setting up DagsHub locally...")
     dagshub.init(repo_owner=DAGSHUB_USER, repo_name=REPO_NAME, mlflow=True)
     mlflow.set_tracking_uri(f"https://dagshub.com/{DAGSHUB_USER}/{REPO_NAME}.mlflow")
 else:
-    # Ini jalan di GitHub Actions (CI), URI sudah diset dari YAML
-    print("[INFO] Environment CI terdeteksi. Menggunakan Env Vars yang ada.")
+    print("[INFO] Environment CI terdeteksi. Menggunakan URI dari Env Vars.")
 
 def train_skilled():
     print("[INFO] Memulai Training...")
     
-    # 1. Load Data (Path handling untuk CI vs Lokal)
+    # 1. Load Data
     if os.path.exists("loan_data_cleaned_automated.csv"):
         df = pd.read_csv("loan_data_cleaned_automated.csv")
     elif os.path.exists("data/loan_data_cleaned_automated.csv"):
@@ -48,20 +48,31 @@ def train_skilled():
     
     grid = GridSearchCV(rf, param_grid, cv=3, scoring='accuracy', verbose=1)
     
-    # --- BAGIAN 2: LOGIKA RUN CONTEXT (Solusi Run ID Conflict) ---
-    active_run = mlflow.active_run()
+    # --- BAGIAN 2: LOGIKA PENGECEKAN RUN (FIXED) ---
     
-    if active_run:
-        print(f"[INFO] Menggunakan Active Run ID: {active_run.info.run_id}")
+    # Cek langsung ke Environment Variable
+    existing_run_id = os.environ.get("MLFLOW_RUN_ID")
+    
+    if existing_run_id:
+        # KONDISI CI (GitHub Actions / 'mlflow run')
+        print(f"[INFO] Terdeteksi MLFLOW_RUN_ID di Environment: {existing_run_id}")
+        print("[INFO] Mode: Auto-Logging ke Run ID yang sudah ada.")
+        
+        # JANGAN set experiment baru (nanti konflik dengan experiment MLflow Project)
+        # JANGAN panggil mlflow.start_run() (karena sudah distart oleh command line)
+        
         execute_training_logic(grid, X_train, y_train, X_test, y_test)
+        
     else:
-        print("[INFO] Tidak ada run aktif. Membuka run baru (Manual Mode)...")
+        # KONDISI LOKAL (Manual 'python modelling_tuning.py')
+        print("[INFO] Tidak ada Run ID di Environment.")
+        print("[INFO] Mode: Manual Run (Membuat Experiment & Run baru).")
+        
         mlflow.set_experiment("Eksperimen_Skilled_Tuning")
         with mlflow.start_run(run_name="Manual_Tuning_Run"):
             execute_training_logic(grid, X_train, y_train, X_test, y_test)
 
 def execute_training_logic(grid, X_train, y_train, X_test, y_test):
-    # Fungsi pembantu biar kodenya rapi
     print("Sedang melakukan GridSearch...")
     grid.fit(X_train, y_train)
     
