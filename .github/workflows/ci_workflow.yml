@@ -30,4 +30,4 @@ jobs:
     - name: Run MLflow Project
       run: |
         # Ini perintah yang diminta reviewer:
-        mlflow run . --env-manager=local
+        mlflow run . --env-manager=local --experiment-name Eksperimen_CI_Fara_New
